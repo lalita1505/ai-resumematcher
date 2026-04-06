@@ -1,0 +1,227 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model AI.ResumeMatcher.Models.MatchResult
+
+@* <form method="post" enctype="multipart/form-data" action="/Match/Analyze" asp-controller="Match">
+    <label>Job Description</label>
+    <textarea name="JobDescription"></textarea>
+
+    <label>Upload Resume</label>
+    <input type="file" name="ResumeFile" />
+
+    <button type="submit">Analyze</button>
+</form> *@
+
+
+@* @if (ViewBag.Result != null)
+{
+    <pre>@ViewBag.Result</pre>
+} *@
+
+@{
+    ViewData["Title"] = "AI Resume – JD Matcher";
+}
+
+<style>
+    body {
+        background-color: #f5f7fa;
+    }
+
+    .matcher-container {
+        max-width: 900px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 30px 40px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .matcher-header h2 {
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+
+    .matcher-header p {
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+
+    label {
+        font-weight: 600;
+        color: #34495e;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .form-control {
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        background-color: #0069d9;
+        border: none;
+        padding: 10px 26px;
+        font-size: 16px;
+        border-radius: 6px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0053b3;
+    }
+
+    .result-section {
+        margin-top: 40px;
+    }
+
+    pre {
+        background-color: #f8f9fa;
+        border-left: 5px solid #0069d9;
+        padding: 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        max-height: 500px;
+        overflow: auto;
+    }
+
+    .footer-note {
+        margin-top: 30px;
+        font-size: 13px;
+        color: #7f8c8d;
+        text-align: center;
+    }
+
+    .result-section h4 {
+        margin-top: 25px;
+        color: #2c3e50;
+    }
+
+    .result-section ul {
+        padding-left: 20px;
+    }
+
+    .result-section li {
+        margin-bottom: 6px;
+    }
+</style>
+
+<div class="matcher-container">
+
+    <div class="matcher-header">
+        <h2>AI Resume – Job Description Matcher</h2>
+        <p>
+            Upload a candidate resume and paste the job description to receive
+            an AI‑powered fit analysis with scores and recommendations.
+        </p>
+    </div>
+
+    <form method="post"
+          enctype="multipart/form-data"
+          action="/Match/Analyze">
+
+        <div class="mb-4">
+            <label for="JobDescription">Job Description</label>
+            <textarea id="JobDescription"
+                      name="JobDescription"
+                      class="form-control"
+                      rows="8"
+                      placeholder="Paste the complete job description here..."
+                      required>
+            </textarea>
+        </div>
+
+        <div class="mb-4">
+            <label for="ResumeFile">Upload Resume</label>
+            <input id="ResumeFile"
+                   type="file"
+                   name="ResumeFile"
+                   class="form-control"
+                   accept=".pdf,.doc,.docx,.txt"
+                   required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Analyze Candidate Fit
+        </button>
+    </form>
+
+    @* @if (ViewBag.Result != null)
+    {
+        <div class="result-section">
+            <h4>Match Report</h4>
+            <pre>@ViewBag.Result</pre>
+        </div>
+    } *@
+
+    @if (Model != null)
+    {
+        <div class="result-section">
+
+            <h3>
+                Overall Match:
+                <span style="color:@(Model.MatchScore >= 80 ? "green" : "orange")">
+                    @Model.Decision (@Model.MatchScore%)
+                </span>
+            </h3>
+
+            <hr />
+
+            <h4>✅ Matching Skills</h4>
+            <ul>
+                @foreach (var skill in Model.MatchingSkills)
+                {
+                    <li>@skill</li>
+                }
+            </ul>
+
+            <h4>❌ Missing Skills</h4>
+            <ul>
+                @foreach (var skill in Model.MissingSkills)
+                {
+                    <li>@skill</li>
+                }
+            </ul>
+
+            <h4>📌 Experience Summary</h4>
+            <p>@Model.ExperienceSummary</p>
+
+            <h4>⚠️ Gaps Observed</h4>
+            <ul>
+                @foreach (var gap in Model.Gaps)
+                {
+                    <li>@gap</li>
+                }
+            </ul>
+
+            <h4>🧠 Hiring Manager Reasoning</h4>
+            <ul>
+                @foreach (var reason in Model.Reasoning)
+                {
+                    <li>@reason</li>
+                }
+            </ul>
+
+            <h4>🚀 Suggestions for Improvement</h4>
+            <ul>
+                @foreach (var improvement in Model.Improvements)
+                {
+                    <li>@improvement</li>
+                }
+            </ul>
+
+        </div>
+    }
+
+    <div class="footer-note">
+        AI‑Powered Resume Matching • ASP.NET Core MVC • AWS Hosted
+    </div>
+</div>
+
