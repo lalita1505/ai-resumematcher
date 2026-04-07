@@ -4,11 +4,8 @@ using AI.ResumeMatcher.Services.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-//builder.Services.AddRazorPages();
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient<IAIService, OllamaService>();
-builder.Services.AddHttpClient<IAIService, OpenAIService>();
 builder.Services.AddScoped<IAIService, GeminiAIService>();
 builder.Services.AddScoped<IMatchingService, MatchingService>();
 
@@ -22,14 +19,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-//app.UseAuthorization();
-
-//app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",

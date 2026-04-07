@@ -15,42 +15,25 @@ namespace AI.ResumeMatcher.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View(new MatchViewModel
+            {
+                Request = new MatchRequest()
+            });
         }
 
-        //[HttpPost("analyze")]
-        //public async Task<IActionResult> Analyze(MatchRequest request)
-        //{
-        //    string resumeText;
-
-        //    using (var reader = new StreamReader(request.ResumeFile.OpenReadStream()))
-        //    {
-        //        resumeText = await reader.ReadToEndAsync();
-        //    }
-
-        //    var result = await _matchingService.ProcessAsync(
-        //        request.JobDescription,
-        //        resumeText);
-
-        //    return View("Result", result);
-        //}
-
-        //[HttpPost("match")]
-        //public async Task<IActionResult> OpenAIAnalyze(MatchRequest request)
-        //{
-        //    var result = await _matchingService.ProcessMatchAsync(request);
-        //    return View("Result", result);
-        //}
-
-
         [HttpPost]
-        public async Task<IActionResult> Analyze(MatchRequest request)
+        public async Task<IActionResult> Analyze(MatchViewModel model)
         {
-            var result = await _matchingService.MatchAsync(request);
+            if (!ModelState.IsValid)
+            {
+                return View("Index", model);
+            }
 
-            //ViewBag.Result = result;
-            return View("Index", result);
+            var result = await _matchingService.MatchAsync(model.Request);
 
+            model.Result = result;
+
+            return View("Index", model);
         }
     }
 }

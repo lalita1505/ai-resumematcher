@@ -14,40 +14,20 @@ namespace AI.ResumeMatcher.Services
             _aiService = aiService;
         }
 
-        public async Task<MatchResponse> ProcessMatchAsync(MatchRequest request)
-        {
-            var resumeText = await FileParser.ExtractText(request.ResumeFile);
-
-            resumeText = resumeText.Length > 4000
-                ? resumeText.Substring(0, 4000)
-                : resumeText;
-
-            resumeText = resumeText.Replace("\n", " ").Replace("\r", " ");
-
-            var prompt = BuildPrompt(request.JobDescription, resumeText);
-
-            var aiResult = await _aiService.GetMatchAnalysisAsync(prompt);
-
-            return aiResult;
-        }
-
-        public async Task<MatchResponse> ProcessAsync(string jd, string resume)
-        {
-            var prompt = BuildPrompt(jd, resume);
-            return await _aiService.AnalyzeAsync(prompt);
-        }
-
         public async Task<MatchResult> MatchAsync(MatchRequest request)
         {
             var resumeText = await FileParser.ExtractText(request.ResumeFile);
 
-            //resumeText = resumeText.Length > 4000
-            //    ? resumeText.Substring(0, 4000)
-            //    : resumeText;
-
             resumeText = resumeText.Replace("\n", " ").Replace("\r", " ");
 
-            var messages = new List<Content>
+            var messages = BuildPrompt(request.JobDescription, resumeText);
+
+            return await _aiService.MatchAsync(messages);
+        }
+
+        private List<Content> BuildPrompt(string jd, string resume)
+        {
+            return new List<Content>
             {
                 new Content
                 {
@@ -98,76 +78,15 @@ namespace AI.ResumeMatcher.Services
                         {
                             Text = $@"
                                     Job Description:
-                                    {request.JobDescription}
+                                    {jd}
 
                                     Resume:
-                                    {resumeText}
+                                    {resume}
                                     "
                         }
                     }
                 }
             };
-
-            //return string.Empty;
-
-            return await _aiService.MatchAsync(messages);
-        }
-
-        private string BuildPrompt(string jd, string resume)
-        {
-            return $@"
-            You are an expert recruiter AI.
-
-            Compare the Job Description and Resume.
-
-            Return JSON:
-            - Score (0-100)
-            - Recommendation
-            - Requirements breakdown
-            - Summary
-
-            Job Description:
-            {jd}
-
-            Resume:
-            {resume}
-            ";
-        }
-
-        private string BuildPrompt1(string jd, string resume)
-        {
-            return $@"
-                You are an expert technical recruiter AI.
-
-                Compare Job Description and Resume.
-
-                Return STRICT JSON:
-
-                {{
-                  ""score"": number (0-100),
-                  ""recommendation"": ""Strongly Recommend | Recommend | Borderline | Do Not Advance"",
-                  ""requirements"": [
-                    {{
-                      ""requirement"": """",
-                      ""status"": ""Met | Partial | Not Met"",
-                      ""confidence"": ""High | Medium | Low"",
-                      ""evidence"": """"
-                    }}
-                  ],
-                  ""summary"": ""Explain in simple English for recruiter""
-                }}
-
-                Rules:
-                - Recognize equivalent skills (AWS=Azure=GCP, React=Angular)
-                - Evaluate experience depth
-                - Avoid keyword-only matching
-
-                JD:
-                {jd}
-
-                Resume:
-                {resume}
-                ";
         }
     }
 }
