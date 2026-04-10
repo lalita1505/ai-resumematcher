@@ -20,7 +20,7 @@ namespace AI.ResumeMatcher.Services
 
             resumeText = resumeText.Replace("\n", " ").Replace("\r", " ");
 
-            var messages = BuildPrompt(request.JobDescription, resumeText);
+            var messages = BuildPrompt(request.JobDescription, resumeText.Trim());
 
             return await _aiService.MatchAsync(messages);
         }
